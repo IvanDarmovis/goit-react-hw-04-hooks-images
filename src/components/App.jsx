@@ -24,7 +24,7 @@ export default class App extends Component {
       // }}
       >
         <Searchbar onSubmit={this.onFormSubmit} />
-        <ImageGallery querry={this.state.searchQuery} />
+        <ImageGallery searchQuerry={this.state.searchQuery} />
       </div>
     );
   }
