@@ -17,3 +17,16 @@
   align-content: center;
   position: relative;
 }
+
+.sipner {
+  margin: 0 auto;
+  margin-top: 40px;
+  width: 60px;
+}
+
+.start {
+  margin: 0 auto;
+  margin-top: 40px;
+  text-align: center;
+  font-size: 28px;
+}
