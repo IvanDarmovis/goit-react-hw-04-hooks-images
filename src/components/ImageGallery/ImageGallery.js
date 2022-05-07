@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { AtomSpinner } from 'react-epic-spinners';
 import ImmageGalleryItem from './ImmageGalleryItem';
 import Button from './Button';
 import Modal from './Modal';
+import Loader from './Loader';
 import PropTypes from 'prop-types';
 import s from './ImageGallery.module.css';
 
@@ -21,17 +21,13 @@ export default class ImageGallery extends Component {
 
   componentDidMount() {
     this.setState({ page: 1, status: 'iddle', scrollPosition: 0 });
-    console.log('mount');
   }
 
   async componentDidUpdate(prevProps, prevState) {
     const url = `https://pixabay.com/api/?q=${this.props.searchQuerry}&page=${this.state.page}&key=${APIKEY}&image_type=photo&orientation=horizontal&per_page=12`;
     const gallery = document.querySelector('.gallery');
-    console.log('prevState', prevState.page);
-    console.log('this.state', this.state);
 
     if (this.props.searchQuerry !== prevProps.searchQuerry) {
-      console.log('query');
       this.setState({ status: 'pending' });
       const resp = await axios.get(url);
       this.setState({
@@ -40,7 +36,6 @@ export default class ImageGallery extends Component {
       });
     }
     if (prevState.page !== this.state.page) {
-      console.log('page');
       this.setState({
         status: 'pending',
         scrollPosition: parseInt(gallery.scrollHeight),
@@ -57,11 +52,7 @@ export default class ImageGallery extends Component {
   }
 
   onLoadMoreClick = ev => {
-    console.log('more clicked');
     ev.preventDefault();
-    // this.setState(prev => ({
-    //   page: (prev.page += 1),
-    // }));
     this.setState({ page: this.state.page + 1 });
   };
 
@@ -91,8 +82,7 @@ export default class ImageGallery extends Component {
         </div>
       );
 
-    if (this.state.status === 'pending')
-      return <AtomSpinner color="#3f51b5" className={s.sipner} />;
+    if (this.state.status === 'pending') return <Loader />;
 
     if (this.state.status === 'resolved')
       return (
