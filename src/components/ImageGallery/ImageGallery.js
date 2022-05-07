@@ -4,6 +4,7 @@ import { AtomSpinner } from 'react-epic-spinners';
 import ImmageGalleryItem from './ImmageGalleryItem';
 import Button from './Button';
 import Modal from './Modal';
+import PropTypes from 'prop-types';
 import s from './ImageGallery.module.css';
 
 const APIKEY = '25607511-28b83b13f0e2975028585da7b&image';
@@ -15,19 +16,20 @@ export default class ImageGallery extends Component {
     src: '',
     status: 'iddle',
     showModal: false,
+    scrollPosition: 0,
   };
 
   componentDidMount() {
-    this.setState({ page: 1, status: 'iddle' });
+    this.setState({ page: 1, status: 'iddle', scrollPosition: 0 });
   }
 
   async componentDidUpdate(prevProps, prevState) {
     const url = `https://pixabay.com/api/?q=${this.props.searchQuerry}&page=${this.state.page}&key=${APIKEY}&image_type=photo&orientation=horizontal&per_page=12`;
+    const gallery = document.querySelector('.gallery');
 
     if (this.props.searchQuerry !== prevProps.searchQuerry) {
       this.setState({ status: 'pending' });
       const resp = await axios.get(url);
-      console.log(resp);
       this.setState({
         images: [...resp.data.hits],
         status: resp.data.total > 0 ? 'resolved' : 'error',
@@ -35,7 +37,10 @@ export default class ImageGallery extends Component {
       });
     }
     if (prevState.page !== this.state.page) {
-      this.setState({ status: 'pending' });
+      this.setState({
+        status: 'pending',
+        scrollPosition: parseInt(gallery.scrollHeight),
+      });
       const resp = await axios.get(url);
       this.setState(prev => ({
         images: [...prev.images, ...resp.data.hits],
@@ -43,11 +48,16 @@ export default class ImageGallery extends Component {
         total: resp.data.total,
       }));
     }
+    window.scrollTo({
+      top: this.state.scrollPosition,
+    });
   }
 
   onLoadMoreClick = ev => {
     ev.preventDefault();
-    this.setState(prev => ({ page: (prev.page += 1) }));
+    this.setState(prev => ({
+      page: (prev.page += 1),
+    }));
   };
 
   toggleModal = () => {
@@ -58,6 +68,8 @@ export default class ImageGallery extends Component {
     this.setState({ src: e.currentTarget.alt });
     this.toggleModal();
   };
+
+  galleryClasses = `gallery ${s.gallery}`;
 
   render() {
     if (this.state.status === 'iddle')
@@ -80,7 +92,7 @@ export default class ImageGallery extends Component {
     if (this.state.status === 'resolved')
       return (
         <div className={s.container}>
-          <ul className={s.gallery}>
+          <ul className={this.galleryClasses}>
             {this.state.images.map(({ id, webformatURL, largeImageURL }) => (
               <ImmageGalleryItem
                 onClick={this.onImageClick}
@@ -100,3 +112,7 @@ export default class ImageGallery extends Component {
       );
   }
 }
+
+ImageGallery.propTypes = {
+  searchQuerry: PropTypes.string.isRequired,
+};
