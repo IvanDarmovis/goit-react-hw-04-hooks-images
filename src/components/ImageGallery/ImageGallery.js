@@ -27,8 +27,7 @@ export default class ImageGallery extends Component {
   async componentDidUpdate(prevProps, prevState) {
     const url = `https://pixabay.com/api/?q=${this.props.searchQuerry}&page=${this.state.page}&key=${APIKEY}&image_type=photo&orientation=horizontal&per_page=12`;
     const gallery = document.querySelector('.gallery');
-    console.log('prevProps', prevProps);
-    console.log('prevState', prevState);
+    console.log('prevState', prevState.page);
     console.log('this.state', this.state);
 
     if (this.props.searchQuerry !== prevProps.searchQuerry) {
@@ -60,9 +59,10 @@ export default class ImageGallery extends Component {
   onLoadMoreClick = ev => {
     console.log('more clicked');
     ev.preventDefault();
-    this.setState(prev => ({
-      page: (prev.page += 1),
-    }));
+    // this.setState(prev => ({
+    //   page: (prev.page += 1),
+    // }));
+    this.setState({ page: this.state.page + 1 });
   };
 
   toggleModal = () => {
