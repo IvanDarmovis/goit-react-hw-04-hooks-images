@@ -29,6 +29,7 @@ export default class ImageGallery extends Component {
     const gallery = document.querySelector('.gallery');
     console.log('prevProps', prevProps);
     console.log('prevState', prevState);
+    console.log('this.state', this.state);
 
     if (this.props.searchQuerry !== prevProps.searchQuerry) {
       console.log('query');
