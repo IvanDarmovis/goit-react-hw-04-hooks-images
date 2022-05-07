@@ -21,22 +21,26 @@ export default class ImageGallery extends Component {
 
   componentDidMount() {
     this.setState({ page: 1, status: 'iddle', scrollPosition: 0 });
+    console.log('mount');
   }
 
   async componentDidUpdate(prevProps, prevState) {
     const url = `https://pixabay.com/api/?q=${this.props.searchQuerry}&page=${this.state.page}&key=${APIKEY}&image_type=photo&orientation=horizontal&per_page=12`;
     const gallery = document.querySelector('.gallery');
+    console.log('prevProps', prevProps);
+    console.log('prevState', prevState);
 
     if (this.props.searchQuerry !== prevProps.searchQuerry) {
+      console.log('query');
       this.setState({ status: 'pending' });
       const resp = await axios.get(url);
       this.setState({
         images: [...resp.data.hits],
         status: resp.data.total > 0 ? 'resolved' : 'error',
-        total: resp.data.total,
       });
     }
     if (prevState.page !== this.state.page) {
+      console.log('page');
       this.setState({
         status: 'pending',
         scrollPosition: parseInt(gallery.scrollHeight),
@@ -45,7 +49,6 @@ export default class ImageGallery extends Component {
       this.setState(prev => ({
         images: [...prev.images, ...resp.data.hits],
         status: 'resolved',
-        total: resp.data.total,
       }));
     }
     window.scrollTo({
@@ -54,6 +57,7 @@ export default class ImageGallery extends Component {
   }
 
   onLoadMoreClick = ev => {
+    console.log('more clicked');
     ev.preventDefault();
     this.setState(prev => ({
       page: (prev.page += 1),
