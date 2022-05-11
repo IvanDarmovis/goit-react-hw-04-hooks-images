@@ -19,7 +19,6 @@ export default class App extends Component {
 
   async componentDidUpdate(prevProps, prevState) {
     if (this.state.searchQuery !== prevState.searchQuery) {
-      this.setState({ status: 'pending' });
       const arr = await Api(this.state.searchQuery, this.state.page);
       this.setState({
         images: [...arr],
@@ -28,12 +27,6 @@ export default class App extends Component {
       });
     }
     if (prevState.page !== this.state.page) {
-      const gallery = document.querySelector('.gallery');
-      console.dir(gallery);
-      this.setState({
-        status: 'pending',
-        scrollPosition: parseInt(gallery.scrollHeight),
-      });
       const arr = await Api(this.state.searchQuery, this.state.page);
       this.setState(prev => ({
         images: [...prev.images, ...arr],
@@ -59,7 +52,12 @@ export default class App extends Component {
 
   onLoadMoreClick = ev => {
     ev.preventDefault();
-    this.setState({ page: this.state.page + 1 });
+    const gallery = document.querySelector('.gallery');
+    this.setState({
+      page: this.state.page + 1,
+      status: 'pending',
+      scrollPosition: parseInt(gallery.scrollHeight),
+    });
   };
 
   toggleModal = () => {
@@ -72,7 +70,7 @@ export default class App extends Component {
   };
 
   onFormSubmit = searchQuery => {
-    this.setState({ searchQuery, page: 1 });
+    this.setState({ searchQuery, page: 1, status: 'pending' });
   };
 
   render() {

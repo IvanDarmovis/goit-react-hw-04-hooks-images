@@ -21,7 +21,7 @@ export default function ImageGallery({ status, images, onClick }) {
       </div>
     );
 
-  if (status === 'resolved')
+  if (status === 'resolved' || 'pending')
     return (
       <div className={s.container}>
         <ul className={galleryClasses}>
