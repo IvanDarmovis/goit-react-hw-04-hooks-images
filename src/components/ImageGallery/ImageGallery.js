@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ImmageGalleryItem from './ImmageGalleryItem';
 
 import PropTypes from 'prop-types';
@@ -7,6 +7,19 @@ import s from './ImageGallery.module.css';
 const galleryClasses = `gallery ${s.gallery}`;
 
 export default function ImageGallery({ status, images, onClick }) {
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  const gallery = useRef();
+
+  useEffect(() => {
+    if (images.length < 1) return;
+    setScrollPosition(gallery.current.scrollHeight);
+    window.scrollTo({
+      top: scrollPosition,
+      behavior: 'smooth',
+    });
+  }, [gallery.current?.scrollHeight, images.length, scrollPosition]);
+
   if (status === 'iddle')
     return (
       <div className={s.start}>
@@ -23,7 +36,7 @@ export default function ImageGallery({ status, images, onClick }) {
 
   if (status === 'resolved' || 'pending')
     return (
-      <div className={s.container}>
+      <div className={s.container} ref={gallery}>
         <ul className={galleryClasses}>
           {images.map(({ id, webformatURL, largeImageURL }) => (
             <ImmageGalleryItem

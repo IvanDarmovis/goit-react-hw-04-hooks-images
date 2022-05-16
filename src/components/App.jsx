@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import ImageGallery from './ImageGallery';
 import Searchbar from './Searchbar';
 import Button from './Button';
@@ -6,90 +6,54 @@ import Modal from './Modal';
 import Loader from './Loader';
 import Api from './Api';
 
-export default class App extends Component {
-  state = {
-    searchQuery: '',
-    images: [],
-    page: 1,
-    src: '',
-    status: 'iddle',
-    showModal: false,
-    scrollPosition: 0,
+export default function App() {
+  const [query, setQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [status, setStatus] = useState('iddle');
+  const [src, setSrc] = useState('');
+  const [showModal, setShowModal] = useState(false);
+
+  const onFormSubmit = query => {
+    setQuery(query);
+    setImages([]);
+    setPage(1);
+    setStatus('pending');
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    if (this.state.searchQuery !== prevState.searchQuery) {
-      const arr = await Api(this.state.searchQuery, this.state.page);
-      this.setState({
-        images: [...arr],
-        status: arr.length > 0 ? 'resolved' : 'error',
-        page: 1,
-      });
-    }
-    if (prevState.page !== this.state.page) {
-      const arr = await Api(this.state.searchQuery, this.state.page);
-      this.setState(prev => ({
-        images: [...prev.images, ...arr],
-        status: 'resolved',
-      }));
-      setTimeout(
-        () =>
-          window.scrollTo({
-            top: prevState.scrollPosition,
-          }),
-        0
-      );
-      setTimeout(
-        () =>
-          window.scrollTo({
-            top: this.state.scrollPosition,
-            behavior: 'smooth',
-          }),
-        200
-      );
-    }
-  }
+  const toggleModal = () => {
+    setShowModal(!showModal);
+  };
 
-  onLoadMoreClick = ev => {
+  const onImageClick = e => {
+    setSrc(e.currentTarget.alt);
+    toggleModal();
+  };
+
+  const onLoadMoreClick = ev => {
     ev.preventDefault();
-    const gallery = document.querySelector('.gallery');
-    this.setState({
-      page: this.state.page + 1,
-      status: 'pending',
-      scrollPosition: parseInt(gallery.scrollHeight),
+    setPage(page + 1);
+    setStatus('pending');
+  };
+
+  useEffect(() => {
+    if (query === '') return;
+
+    Api(query, page).then(data => {
+      setImages(prev => [...prev, ...data]);
+      setStatus(data.length > 0 ? 'resolved' : 'error');
     });
-  };
+  }, [page, query]);
 
-  toggleModal = () => {
-    this.setState(prev => ({ showModal: !prev.showModal }));
-  };
-
-  onImageClick = e => {
-    this.setState({ src: e.currentTarget.alt });
-    this.toggleModal();
-  };
-
-  onFormSubmit = searchQuery => {
-    this.setState({ searchQuery, page: 1, status: 'pending' });
-  };
-
-  render() {
-    return (
-      <div>
-        <Searchbar onSubmit={this.onFormSubmit} />
-        <ImageGallery
-          status={this.state.status}
-          images={this.state.images}
-          onClick={this.onImageClick}
-        />
-        {this.state.status === 'pending' && <Loader />}
-        {this.state.images.length > 0 && (
-          <Button onClick={this.onLoadMoreClick}>Load more</Button>
-        )}
-        {this.state.showModal && (
-          <Modal onClose={this.toggleModal} src={this.state.src} />
-        )}
-      </div>
-    );
-  }
+  return (
+    <div>
+      <Searchbar onSubmit={onFormSubmit} />
+      <ImageGallery status={status} images={images} onClick={onImageClick} />
+      {status === 'pending' && <Loader />}
+      {images.length > 0 && (
+        <Button onClick={onLoadMoreClick}>Load more</Button>
+      )}
+      {showModal && <Modal onClose={toggleModal} src={src} />}
+    </div>
+  );
 }
